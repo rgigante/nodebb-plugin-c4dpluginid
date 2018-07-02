@@ -69,7 +69,7 @@ After installing the plugin it's mandatory to create a document used to store th
 ```js
 $ mongo <dbname> -u <username> -p <password>
 
-> db.getCollection('objects').insertOne({ _key : "globalPluginID", nextID : NumberInt(1100000), lastCreated : 0.0})
+> db.getCollection('objects').insertOne({ _key : "globalPluginID", nextID : NumberInt(<YourInitialValue>), lastCreated : 0.0})
 ```  
 
 ## Data storage
@@ -77,7 +77,7 @@ The plugin makes use of a document (a MongoDB record) to store global informatio
 ```json
 {
     "_key" : "globalPluginID",
-    "nextID" : 1100000,
+    "nextID" : 1100001,
     "lastCreated" : 0.0
 }
 ```
@@ -87,8 +87,8 @@ The *lastCreate* store the timestamp of the last created plugin ID.
 Each pluginID entry is stored in a separate document actually structured as follow:
 ```json
 {
-    "_key" : "pluginid:1100001",
-    "pluginid" : 1100001,
+    "_key" : "pluginid:1100000",
+    "pluginid" : 1100000,
     "uid" : 1,
     "label" : "MyFirstPlugin",
     "timestamp" : 1530535713654.0
