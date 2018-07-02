@@ -1,0 +1,26 @@
+{
+  "name": "nodebb-plugin-c4dpluginid",
+  "version": "0.1.0",
+  "description": "NodeBB plugin to create Cinema 4D plugin IDs",
+  "main": "library.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rgigante/nodebb-plugin-c4dpluginid"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "c4d",
+    "pluginid",
+    "shell"
+  ],
+  "author": {
+    "name": "rgigante",
+    "email": "r_gigante@maxon.net"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "nbbpm": {
+    "compatibility": "^1.0.0"
+  }
+}
