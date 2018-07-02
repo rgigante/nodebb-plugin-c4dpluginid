@@ -19,7 +19,7 @@ plugin.init = function(params, callback) {
 	// Define the routes for the view
 	router.get('/admin/plugins/c4dpluginid', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/c4dpluginid', controllers.renderAdminPage);
-	router.get('/c4dpluginid', hostMiddleware.buildHeader, controllers.renderCustomPage);
+	router.get('/c4dpluginid_cp', hostMiddleware.buildHeader, controllers.renderCustomPage);
 	
 	callback();
 };
@@ -39,13 +39,13 @@ function tsToDate (ts){
 	let date = new Date(ts);
 	// Hours part from the timestamp
 	let years = date.getFullYear(),
-		months = date.getMonth() + 1,
-		days = date.getDate(),
+		months = "0" + date.getMonth() + 1,
+		days = "0" + date.getDate(),
 		hours = "0" + date.getHours(),
 		minutes = "0" + date.getMinutes(),
 		seconds = "0" + date.getSeconds();
 
-	return (years + "-" + months + "-" + days + " " + hours.substr(-2) + ':' + minutes.substr(-2) + ':' + seconds.substr(-2));
+	return (years + "-" + months.substr(-2) + "-" + days.substr(-2) + " " + hours.substr(-2) + ':' + minutes.substr(-2) + ':' + seconds.substr(-2));
 }
 // prepare the query string retrieving the plugin IDs belonging to the given the user ID
 function PrepareQueryPluginIFromUser(userid)
@@ -58,18 +58,16 @@ function PrepareQueryUserData(userid){
 	return {"_key":{$regex:'^user:'}, $or : [{uid : String(userid)}, {uid : userid}]};
 }
 
-//  execute the query
+//  execute a generic query
 function ExecuteQuery (url, name, query, sortkey, sortval, callback){
 	MongoClient.connect(url, function(err, database){
 		if (err) throw err;
 		if (sortkey.length == 0)
 		{
-			console.log("no sorting");
 			// no sorting
 			database.db(name).collection("objects").find(query).toArray(function(err, result) {
 				if (err) throw err;
 				database.close();
-				console.log(result);
 				callback(result);
 			});
 		}
@@ -78,11 +76,62 @@ function ExecuteQuery (url, name, query, sortkey, sortval, callback){
 			database.db(name).collection("objects").find(query).sort(sortkey, sortval).toArray(function(err, result) {
 				if (err) throw err;
 				database.close();
-				console.log(result);
 				callback(result);
 			});			
 		}
 	});
+}
+
+// given the user data (website and name) and the settings stored in the c4dpluginid ACP returns an array with HTML for both paragraph and information
+function PrepareHTMLFromUserWebsite(settings, userWebsite, userName) {
+
+	let res = [];
+
+	if (settings.notifydomain == "on") {
+		// check if website has been set in the user profile
+		if (userWebsite.length != 0) {
+			let websiteArray = userWebsite.split(".");
+			// check if the website is  compliant which means it should be
+			// composed at least by three parts like <part1>.<part2>.<part3> and <part1> == "www"
+			if (websiteArray.length >= 3 && websiteArray[0] == "www") {
+				// use data from website
+				res.push("MAXON API suggested domain space");
+				res.push("The suggested MAXON API domain space, based on your profile, is: <b>" + websiteArray[2] + "." + websiteArray[1] + ".*</b>");
+			}
+			else {
+				// use default value found in ACP
+				res.push("MAXON API suggested domain space");
+				res.push("The suggested MAXON API domain space, based on your profile, is: <b>" + settings.revdomainspace + "." +  userName + ".*</b>"); // To be changed
+			}
+		}
+		else {
+			// use default value found in ACP
+			res.push("MAXON API suggested domain space");
+			res.push("The suggested MAXON API domain space, based on your profile, is: <b>" + settings.revdomainspace + "." +  userName + ".*</b>");
+		}
+	}
+
+	return res;
+}
+
+// given the pluginID array returns the proper HTML table
+function PrepareHTMLfromPluginIDs(pluginIDArray, userName)
+{
+	let res = "";
+	let size_a = 15, size_b = 55, size_c = 30;
+	res = "<p>List of plugin ID assigned to <b>"+userName+"</b>:</p>";
+	res +="<table width=500><tr><th width=\""+String(size_a)+"%\">Plugin ID</th><th width=\""+String(size_b)+"%\">Associated Label</th><th width=\""+String(size_c)+"%\">Creation Date</th></tr>";
+	
+	// process the queryRes to return the data on the client
+	for (let i = 0; i < pluginIDArray.length; i++)
+	{
+		let pluginIDEntry = pluginIDArray[i];
+		res += "<tr><td width=\""+String(size_a)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_b)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_c)+"%\">"+tsToDate(pluginIDEntry.timestamp)+"</td></tr>";
+	}
+
+	res += "</table>";	
+
+	return res;
 }
 
 // execute the pluginID object insert and increment the global counter
@@ -124,49 +173,15 @@ socketModules.onLoadPage = function(socket, callback) {
 
 				let HTMLResObj = { domainInfo: [], pluginidInfo: ""};
 
-				if (settings.notifydomain == "on")
-				{
-					// check if website has been set in the user profile
-					if (userWebsite.length != 0){
-
-						let websiteArray = userWebsite.split(".");
-						// check if the website is  compliant which means it should be
-						// composed at least by three parts like <part1>.<part2>.<part3> and <part1> == "www"
-						if (websiteArray.length >= 3 && websiteArray[0] == "www")
-						{
-							// use data from website
-							HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-							HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is: <b>"+websiteArray[2]+"."+websiteArray[1]+".*</b>");
-						}
-						else
-						{
-							// use default value found in ACP
-							HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-							HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is: <b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
-						}
-					}
-					else
-					{
-						// use default value found in ACP
-						HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-						HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is: <b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
-					}
-				}
+				// return the information about MAXON API suggested domain space
+				HTMLResObj.domainInfo = PrepareHTMLFromUserWebsite(settings, userWebsite, userName);
 
 				// try to execute the query to retrieve all the plugin registered by the current user
 				ExecuteQuery(dbUrl, dbName, PrepareQueryPluginIFromUser(userID), "timestamp", -1, function(pluginIDArray){	
 					
-					HTMLResObj.pluginidInfo = "<p>List of plugin ID assigned to <b>"+userName+"</b>:</p>";
-					HTMLResObj.pluginidInfo +="<table width=500><tr><th width=\"15%\">Plugin ID</th><th width=\"60%\">Associated Label</th><th width=\"25%\">Creation Date</th></tr>";
-					
-					// process the queryRes to return the data on the client
-					for (let i = 0; i < pluginIDArray.length; i++)
-					{
-						let pluginIDEntry = pluginIDArray[i];
-						HTMLResObj.pluginidInfo += "<tr><td width=\"15%\">"+pluginIDEntry.pluginid+"</td><td width=\"60%\">"+pluginIDEntry.label+"</td><td width=\"25%\">"+tsToDate(pluginIDEntry.timestamp)+"</td></tr>";
-					}
-
-					HTMLResObj.pluginidInfo += "</table>";
+					if (pluginIDArray.length != 0)
+						// return the information about requested plugin IDs
+						HTMLResObj.pluginidInfo = PrepareHTMLfromPluginIDs(pluginIDArray, userName);
 
 					callback(null, HTMLResObj);
 				});
@@ -206,34 +221,8 @@ socketModules.onGenerateID = function(socket, data, callback){
 					
 					let HTMLResObj = { domainInfo: [], pluginidInfo: ""};
 
-					if (settings.notifydomain == "on")
-					{
-						// check if website has been set in the user profile
-						if (userWebsite.length != 0){
-	
-							let websiteArray = userWebsite.split(".");
-							// check if the website is  compliant which means it should be
-							// composed at least by three parts like <part1>.<part2>.<part3> and <part1> == "www"
-							if (websiteArray.length >= 3 && websiteArray[0] == "www")
-							{
-								// use data from website
-								HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-								HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is :<b>"+websiteArray[2]+"."+websiteArray[1]+".*</b>");
-							}
-							else
-							{
-								// use default value found in ACP
-								HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-								HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is :<b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
-							}
-						}
-						else
-						{
-							// use default value found in ACP
-							HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-							HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is :<b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
-						}
-					}
+					// return the information about MAXON API suggested domain space
+					HTMLResObj.domainInfo = PrepareHTMLFromUserWebsite(settings, userWebsite, userName);
 
 					// try to execute the query to check the next-to-be-used plugin ID
 					ExecuteQuery(dbUrl, dbName, dbQueryNextPluginID, "", 1, function(queryRes){	
@@ -253,17 +242,10 @@ socketModules.onGenerateID = function(socket, data, callback){
 							// try to execute the query to retrieve all the plugin registered by the current user
 							ExecuteQuery(dbUrl, dbName, PrepareQueryPluginIFromUser(userID), "timestamp", -1, function(pluginIDArray){	
 							
-								HTMLResObj.pluginidInfo = "<p>List of plugin ID assigned to <b>"+userName+"</b>:</p>";
-								HTMLResObj.pluginidInfo +="<table width=500><tr><th width=\"15%\">Plugin ID</th><th width=\"60%\">Associated Label</th><th width=\"25%\">Creation Date</th></tr>";
-								
-								// process the queryRes to return the data on the client
-								for (let i = 0; i < pluginIDArray.length; i++)
-								{
-									let pluginIDEntry = pluginIDArray[i];
-									HTMLResObj.pluginidInfo += "<tr><td width=\"15%\">"+pluginIDEntry.pluginid+"</td><td width=\"60%\">"+pluginIDEntry.label+"</td><td width=\"25%\">"+tsToDate(pluginIDEntry.timestamp)+"</td></tr>";
-								}
-
-								HTMLResObj.pluginidInfo += "</table>"
+								if (pluginIDArray.length != 0)
+									// return the information about requested plugin IDs
+									HTMLResObj.pluginidInfo = PrepareHTMLfromPluginIDs(pluginIDArray, userName);
+		
 								callback(null, HTMLResObj);
 							});
 						});
@@ -275,3 +257,4 @@ socketModules.onGenerateID = function(socket, data, callback){
 };
 
 module.exports = plugin;
+
