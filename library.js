@@ -19,7 +19,7 @@ plugin.init = function(params, callback) {
 	// Define the routes for the view
 	router.get('/admin/plugins/c4dpluginid', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/c4dpluginid', controllers.renderAdminPage);
-	router.get('/custompage01', hostMiddleware.buildHeader, controllers.renderCustomPage);
+	router.get('/c4dpluginid', hostMiddleware.buildHeader, controllers.renderCustomPage);
 	
 	callback();
 };
