@@ -3,7 +3,7 @@
 		<div class="col-sm-2 col-xs-12 settings-header">General</div>
 		<div class="col-sm-10 col-xs-12">
 			<p class="lead">
-				Plugin ID generation settings
+				Cinema 4D Plugin ID Request settings
 			</p>
 			<div class="form-group">
 				<label for="revdomainspace">Default reverse domain space</label>

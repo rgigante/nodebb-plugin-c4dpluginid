@@ -1,6 +1,6 @@
 {
-	"id": "nodebb-plugin-RiccardoTest01",
-	"url": "https://github.com/NodeBB/nodebb-plugin-RiccardoTest01",
+	"id": "nodebb-plugin-c4dpluginid",
+	"url": "https://github.com/rgigante/nodebb-plugin-c4dpluginid",
 	"library": "./library.js",
 	"hooks": [
 		{ "hook": "static:app.load", "method": "init" },

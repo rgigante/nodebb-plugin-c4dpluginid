@@ -5,8 +5,8 @@ var controllers = require('./lib/controllers'),
 	meta = module.parent.require('./meta');
 
 let MongoClient = module.parent.require('mongodb').MongoClient,
-	dbUrl = "mongodb://nodebb_plugin:n0debb_plugin@localhost:27017/nodebb_plugin",
-	dbName = "nodebb_plugin",
+	dbUrl = "mongodb://nodebb:n0debb@localhost:27017/nodebb",
+	dbName = "nodebb",
 	dbQueryNextPluginID = {"_key":{$regex:'^globalPluginID'}};
 
 // init and addAdminNavigation generic functions
@@ -28,7 +28,7 @@ plugin.addAdminNavigation = function(header, callback) {
 	header.plugins.push({
 		route: '/plugins/c4dpluginid',
 		icon: 'fa-tint',
-		name: 'Quickstart'
+		name: 'C4D Plugin ID'
 	});
 
 	callback(null, header);

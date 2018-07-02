@@ -1,6 +1,6 @@
 # c4dpluginid Plugin for NodeBB
 
-A plugin to generate Cinema 4D plugin IDs and notify user about the MAXON API domain space to use for developing Cinema 4D plugins. 
+A plugin to request Cinema 4D plugin IDs and notify user about the MAXON API domain space to use for developing Cinema 4D plugins. 
 
 The plugin needs the "Custom Pages" plugin to be installed and a custom page to be created with the following data used in the custom page "content" area:
 
@@ -21,12 +21,11 @@ $(document).ready(function() {
       document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
     }
     document.getElementById("registeredID").innerHTML = result.pluginidInfo;
-    //alert(result);
   })
 });
 
 // executed upon the the 'generate ID' button is pressed
-// process the information provided in the form, generate a new valid id, store it by updating the DB, 
+// parse the information provided in the form, request a new valid id, store it by updating the DB, 
 // retrieve the list of all the registration IDs belonging to the user and  list them in the page
 function GenerateID()
 {
@@ -39,7 +38,6 @@ function GenerateID()
       document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
     }
     document.getElementById("registeredID").innerHTML = result.pluginidInfo;
-    //alert(result);
   });
 }
 </script>
