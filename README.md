@@ -63,5 +63,39 @@ This plugin requires at this stage **Custom Pages for NodeBB** plugin to be inst
 
 ## Installation
 
-    npm install nodebb-plugin-c4dpluginid
+    npm install nodebb-plugin-c4dpluginid  
 
+After installing the plugin it's mandatory to create a document used to store the global pluginID values using
+```js
+$ mongo <dbname> -u <username> -p <password>
+
+> db.getCollection('objects').insertOne({ _key : "globalPluginID", nextID : NumberInt(1100000), lastCreated : 0.0})
+```  
+
+## Data storage
+The plugin makes use of a document (a MongoDB record) to store global information about pluginID actually structured as follow:
+```json
+{
+    "_key" : "globalPluginID",
+    "nextID" : 1100000,
+    "lastCreated" : 0.0
+}
+```
+The *nextID*  value can be initialized to any desired values.
+The *lastCreate* store the timestamp of the last created plugin ID.
+
+Each pluginID entry is stored in a separate document actually structured as follow:
+```json
+{
+    "_key" : "pluginid:1100001",
+    "pluginid" : 1100001,
+    "uid" : 1,
+    "label" : "MyFirstPlugin",
+    "timestamp" : 1530535713654.0
+}
+```
+The *_key* stores a unique string containing information about the entry.
+The *pluginid* stores the actual ID of the plugin.
+The *uid* stores the user who created the plugin ID.
+The *label* stores the name used for identifying the plugin ID.
+The *timestamp* stores the creation timestamp.
