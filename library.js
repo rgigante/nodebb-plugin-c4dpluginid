@@ -218,20 +218,20 @@ socketModules.onGenerateID = function(socket, data, callback){
 							{
 								// use data from website
 								HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-								HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is:<b>"+websiteArray[2]+"."+websiteArray[1]+".*</b>");
+								HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is :<b>"+websiteArray[2]+"."+websiteArray[1]+".*</b>");
 							}
 							else
 							{
 								// use default value found in ACP
 								HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-								HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is:<b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
+								HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is :<b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
 							}
 						}
 						else
 						{
 							// use default value found in ACP
 							HTMLResObj.domainInfo.push("MAXON API suggested domain space")
-							HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is:<b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
+							HTMLResObj.domainInfo.push("The suggested MAXON API domain space, based on your profile, is :<b>"+settings.revdomainspace+userName+".*</b>"); // To be changed
 						}
 					}
 
