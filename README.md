@@ -59,7 +59,7 @@ function GenerateID()
 ```
 
 ## Prerequisites
-This plugin requires at this stage **Custom Pages for NodeBB** plugin to be installed. The plugin is available [here].(https://github.com/psychobunny/nodebb-plugin-custom-pages#readme)
+This plugin requires at this stage **Custom Pages for NodeBB** plugin to be installed. The plugin is available [here](https://github.com/psychobunny/nodebb-plugin-custom-pages#readme).
 
 ## Installation
 
