@@ -13,7 +13,6 @@ The plugin needs the "Custom Pages" plugin to be installed and a custom page to 
 // executed upon the document is ready
 // retrieve the list of all the registration IDs belonging to the user and list them in the page
 $(document).ready(function() {
-  //console.log("$(document).ready"); // debug
   socket.emit('modules.onLoadPage', function(err, result) {
     if (result.domainInfo.length == 2 && result.domainInfo[0].length != 0)
     {
@@ -27,10 +26,9 @@ $(document).ready(function() {
 // executed upon the the 'generate ID' button is pressed
 // parse the information provided in the form, request a new valid id, store it by updating the DB, 
 // retrieve the list of all the registration IDs belonging to the user and  list them in the page
-function GenerateID()
-{
-  //console.log("GenerateID()"); // debug
+function GenerateID(){
   let pluginLabel = document.getElementById("pluginLabel").value;
+  document.getElementById("pluginLabel").value = '';
   socket.emit('modules.onGenerateID', {values: [pluginLabel]}, function(err, result) {
     if (result.domainInfo.length == 2 && result.domainInfo[0].length != 0)
     {
@@ -38,6 +36,7 @@ function GenerateID()
       document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
     }
     document.getElementById("registeredID").innerHTML = result.pluginidInfo;
+    document.getElementById("pluginLabel").innerHTML = "done";
   });
 }
 </script>
@@ -48,7 +47,7 @@ function GenerateID()
 <p id="suggestedDomain"></p>
 <h4>Plugin ID generation</h4>
 <form>
-  Label:&nbsp;<input type="text" name="pluginLabel" id="pluginLabel" maxlength="256" />
+  Label:&nbsp;<input type="text" name="pluginLabel" id="pluginLabel" maxlength="256"/>
   <button type="button" onclick="GenerateID()">Get PluginID</button>
 </form>
 <hr><p id="registeredID"></p>
