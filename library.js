@@ -40,7 +40,7 @@ function VerifyLabel(label){
 	let verifiedLabel = label.replace(/<(.|\n)*?>/g, '');
 
 	// strip out all non alphanumeric characters potentially causes of MongoDB injections
-	verifiedLabel = verifiedLabel.replace(/[^A-Za-z0-1]/g, '');	
+	verifiedLabel = verifiedLabel.replace(/[^A-Za-z0-9-_]/g, '');	
 
 	// check for the validity of the label used for the plugin ID generation
 	let validity = !(verifiedLabel.length === 0 || !verifiedLabel || /^\s*$/.test(verifiedLabel));
