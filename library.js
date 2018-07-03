@@ -34,8 +34,24 @@ plugin.addAdminNavigation = function(header, callback) {
 	callback(null, header);
 };
 
+// check label correctness and validity
+function VerifyLabel(label){
+	// strip out all HTML-tags
+	let verifiedLabel = label.replace(/<(.|\n)*?>/g, '');
+	
+	// strip out any white space
+	verifiedLabel = verifiedLabel.replace(/\s/g,'');
+
+	// check for the validity of the label used for the plugin ID generation
+	let validity = !(verifiedLabel.length === 0 || !verifiedLabel || /^\s*$/.test(verifiedLabel));
+
+	console.log("validity: "+validity);
+	console.log("verifiedLabel: "+verifiedLabel);
+	return {validity, verifiedLabel};
+};
+
 // convert unix timestamp to date string
-function tsToDate (ts){
+function TimestampToDate (ts){
 	let date = new Date(ts);
 	// Hours part from the timestamp
 	let years = date.getFullYear(),
@@ -126,7 +142,7 @@ function PrepareHTMLfromPluginIDs(pluginIDArray, userName)
 	for (let i = 0; i < pluginIDArray.length; i++)
 	{
 		let pluginIDEntry = pluginIDArray[i];
-		res += "<tr><td width=\""+String(size_a)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_b)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_c)+"%\">"+tsToDate(pluginIDEntry.timestamp)+"</td></tr>";
+		res += "<tr><td width=\""+String(size_a)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_b)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_c)+"%\">"+TimestampToDate(pluginIDEntry.timestamp)+"</td></tr>";
 	}
 
 	res += "</table>";	
@@ -199,14 +215,17 @@ socketModules.onGenerateID = function(socket, data, callback){
 	else{
 
 		// remove white spaces
-		let pluginLabel = data.values[0].replace(/\s/g,'');
+		// let pluginLabel = data.values[0].replace(/\s/g,'');
 		
 		// check for the validity of the label used for the plugin ID generation
-		if (pluginLabel.length === 0 || !pluginLabel || /^\s*$/.test(pluginLabel)){
-			callback (null, "<b>Plugin ID generation failed!</b><br><p>Provide a valid string for the label.</p>");
-		}
-		else{
-			
+		let resVerify = VerifyLabel(data.values[0]);
+		console.log(resVerify.validity);
+		console.log(resVerify.verifiedLabel);
+		
+		// check for the validity of the label used for the plugin ID generation
+		//if (pluginLabel.length === 0 || !pluginLabel || /^\s*$/.test(pluginLabel)){
+		if (resVerify.validity){
+		
 			// try to retrieve c4dpluginid ACP settings
 			meta.settings.get('c4dpluginid', function(err, settings){
 				if (err) throw err;
@@ -232,7 +251,7 @@ socketModules.onGenerateID = function(socket, data, callback){
 							_key : "pluginid:"+String(queryRes[0].nextID),
 							pluginid : queryRes[0].nextID,
 							uid : userID,
-							label : pluginLabel,
+							label : resVerify.verifiedLabel,
 							timestamp : Date.now()
 							};
 						
@@ -252,6 +271,9 @@ socketModules.onGenerateID = function(socket, data, callback){
 					});
 				});
 			});
+		}		
+		else{
+			callback (null, "<b>Plugin ID generation failed!</b><br><p>Provide a valid string for the label.</p>");
 		}
 	}
 };
