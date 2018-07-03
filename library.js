@@ -38,15 +38,13 @@ plugin.addAdminNavigation = function(header, callback) {
 function VerifyLabel(label){
 	// strip out all HTML-tags
 	let verifiedLabel = label.replace(/<(.|\n)*?>/g, '');
-	
-	// strip out any white space
-	verifiedLabel = verifiedLabel.replace(/\s/g,'');
+
+	// strip out all non alphanumeric characters potentially causes of MongoDB injections
+	verifiedLabel = verifiedLabel.replace(/[^A-Za-z0-1]/g, '');	
 
 	// check for the validity of the label used for the plugin ID generation
 	let validity = !(verifiedLabel.length === 0 || !verifiedLabel || /^\s*$/.test(verifiedLabel));
 
-	console.log("validity: "+validity);
-	console.log("verifiedLabel: "+verifiedLabel);
 	return {validity, verifiedLabel};
 };
 
@@ -213,17 +211,11 @@ socketModules.onGenerateID = function(socket, data, callback){
 		callback (null, "<b>Wrong route!</b><br><p>Plugin ID generation is available to registered-only members.</p>");
 	}
 	else{
-
-		// remove white spaces
-		// let pluginLabel = data.values[0].replace(/\s/g,'');
 		
-		// check for the validity of the label used for the plugin ID generation
+		// check and prepare the label to be used for the plugin ID generation
 		let resVerify = VerifyLabel(data.values[0]);
-		console.log(resVerify.validity);
-		console.log(resVerify.verifiedLabel);
 		
 		// check for the validity of the label used for the plugin ID generation
-		//if (pluginLabel.length === 0 || !pluginLabel || /^\s*$/.test(pluginLabel)){
 		if (resVerify.validity){
 		
 			// try to retrieve c4dpluginid ACP settings
