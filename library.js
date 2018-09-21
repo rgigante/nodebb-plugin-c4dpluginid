@@ -53,7 +53,7 @@ function TimestampToDate (ts){
 	let date = new Date(ts);
 	// Hours part from the timestamp
 	let years = date.getFullYear(),
-		months = "0" + date.getMonth() + 1,
+		months = "0" + (date.getMonth() + 1),
 		days = "0" + date.getDate(),
 		hours = "0" + date.getHours(),
 		minutes = "0" + date.getMinutes(),
