@@ -134,13 +134,13 @@ function PrepareHTMLfromPluginIDs(pluginIDArray, userName)
 	let res = "";
 	let size_a = 15, size_b = 55, size_c = 30;
 	res = "<p>List of plugin ID assigned to <b>"+userName+"</b>:</p>";
-	res +="<table width=500><tr><th width=\""+String(size_a)+"%\">Plugin ID</th><th width=\""+String(size_b)+"%\">Associated Label</th><th width=\""+String(size_c)+"%\">Creation Date</th></tr>";
+	res +="<table width=500><tr><th width=\""+String(size_b)+"%\">Associated Label</th><th width=\""+String(size_a)+"%\">Plugin ID</th><th width=\""+String(size_c)+"%\">Creation Date</th></tr>";
 	
 	// process the queryRes to return the data on the client
 	for (let i = 0; i < pluginIDArray.length; i++)
 	{
 		let pluginIDEntry = pluginIDArray[i];
-		res += "<tr><td width=\""+String(size_a)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_b)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_c)+"%\">"+TimestampToDate(pluginIDEntry.timestamp)+"</td></tr>";
+		res += "<tr><td width=\""+String(size_b)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_a)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_c)+"%\">"+TimestampToDate(pluginIDEntry.timestamp)+"</td></tr>";
 	}
 
 	res += "</table>";	
