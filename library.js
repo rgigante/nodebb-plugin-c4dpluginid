@@ -1,8 +1,8 @@
 "use strict";
 
 var controllers = require('./lib/controllers'),
-	socketModules = module.parent.require('./socket.io/modules'),
-	meta = module.parent.require('./meta');
+	socketModules = require.main.require('./src/socket.io/modules'),
+	meta = require.main.require('./src/meta');
 
 let MongoClient = module.parent.require('mongodb').MongoClient,
 	dbUrl = "mongodb://nodebb:n0debb@localhost:27017/nodebb",
@@ -132,15 +132,15 @@ function PrepareHTMLFromUserWebsite(settings, userWebsite, userName) {
 function PrepareHTMLfromPluginIDs(pluginIDArray, userName)
 {
 	let res = "";
-	let size_a = 15, size_b = 55, size_c = 30;
+	let size_id = 10, size_label = 70, size_date = 20;
 	res = "<p>List of plugin ID assigned to <b>"+userName+"</b>:</p>";
-	res +="<table width=500><tr><th width=\""+String(size_b)+"%\">Associated Label</th><th width=\""+String(size_a)+"%\">Plugin ID</th><th width=\""+String(size_c)+"%\">Creation Date</th></tr>";
+	res +="<table width=1024><tr><th width=\""+String(size_label)+"%\">Associated Label</th><th width=\""+String(size_id)+"%\">Plugin ID</th><th width=\""+String(size_date)+"%\">Creation Date</th></tr>";
 	
 	// process the queryRes to return the data on the client
 	for (let i = 0; i < pluginIDArray.length; i++)
 	{
 		let pluginIDEntry = pluginIDArray[i];
-		res += "<tr><td width=\""+String(size_b)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_a)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_c)+"%\">"+TimestampToDate(pluginIDEntry.timestamp)+"</td></tr>";
+		res += "<tr><td width=\""+String(size_label)+"%\">"+pluginIDEntry.label+"</td><td width=\""+String(size_id)+"%\">"+pluginIDEntry.pluginid+"</td><td width=\""+String(size_date)+"%\">"+TimestampToDate(pluginIDEntry.timestamp)+"</td></tr>";
 	}
 
 	res += "</table>";	
