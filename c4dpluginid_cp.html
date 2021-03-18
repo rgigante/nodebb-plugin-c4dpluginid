@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script>
+// ---> THIS PAGE IS MEANT TO BE ADDED AS A "CUSTOM PAGE" IN NODEBB <---
+
+// executed upon the document is ready
+// retrieve the list of all the registration IDs belonging to the user and list them in the page
+$(document).ready(function() {
+  socket.emit('modules.onLoadPage', function(err, result) {
+    if (result.domainInfo !== undefined)
+    {
+      if (result.domainInfo[0] !== undefined && result.domainInfo[0].length != 0)
+        document.getElementById("suggestedDomainH4").innerHTML = result.domainInfo[0];
+      
+      if (result.domainInfo[1] !== undefined && result.domainInfo[1].length != 0)
+        document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
+      
+      if (result.domainInfo[2] !== undefined && result.domainInfo[2].length != 0)
+      document.getElementById("form").innerHTML = result.domainInfo[2];
+    }
+    if (result.pluginidInfo !== undefined && result.pluginidInfo.length != 0 )
+      document.getElementById("registeredID").innerHTML = result.pluginidInfo;
+  })
+});
+
+// executed upon the the 'generate ID' button is pressed
+// parse the information provided in the form, request a new valid id, store it by updating the DB, 
+// retrieve the list of all the registration IDs belonging to the user and  list them in the page
+function GenerateID(){
+  let pluginLabel = document.getElementById("pluginLabel").value;
+  document.getElementById("pluginLabel").value = '';
+  socket.emit('modules.onGenerateID', {values: [pluginLabel]}, function(err, result) {
+    if (result.domainInfo !== undefined)
+    {
+      if (result.domainInfo[0] !== undefined && result.domainInfo[0].length != 0)
+        document.getElementById("suggestedDomainH4").innerHTML = result.domainInfo[0];
+      
+      if (result.domainInfo[1] !== undefined && result.domainInfo[1].length != 0)
+        document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
+      
+      if (result.domainInfo[2] !== undefined && result.domainInfo[2].length != 0)
+      document.getElementById("form").innerHTML = result.domainInfo[2];
+    }
+    if (result.pluginidInfo !== undefined && result.pluginidInfo.length != 0 )
+      document.getElementById("registeredID").innerHTML = result.pluginidInfo;
+
+    document.getElementById("pluginLabel").innerHTML = "done";
+  });
+}
+</script>
+</head>
+
+<body>
+<h4 id="suggestedDomainH4"></h4>
+<p id="suggestedDomain"></p>
+<p id="form"></p>
+<p id="registeredID"></p>
+</body>
+</html>
