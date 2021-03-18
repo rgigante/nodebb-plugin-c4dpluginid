@@ -1,13 +1,18 @@
 "use strict";
 
-var controllers = require('./lib/controllers'),
-	socketModules = require.main.require('./src/socket.io/modules'),
-	meta = require.main.require('./src/meta');
+const controllers = require('./lib/controllers');
+const socketModules = require.main.require('./src/socket.io/modules');
+const meta = require.main.require('./src/meta');
+const nconf = module.parent.require('nconf');
 
-let MongoClient = module.parent.require('mongodb').MongoClient,
-	dbUrl = "mongodb://nodebb:n0debb@localhost:27017/nodebb",
-	dbName = "nodebb",
-	dbQueryNextPluginID = {"_key":{$regex:'^globalPluginID'}};
+// create constants object
+const constants = Object.freeze({
+	dburi: nconf.get('mongo:uri'),
+	dbname: nconf.get('mongo:database')
+});
+
+const MongoClient = module.parent.require('mongodb').MongoClient;
+const dbQueryNextPluginID = {"_key":{$regex:'^globalPluginID'}};
 
 // init and addAdminNavigation generic functions
 let plugin = {};
@@ -102,28 +107,36 @@ function PrepareHTMLFromUserWebsite(settings, userWebsite, userName) {
 	let res = [];
 
 	if (settings.notifydomain == "on") {
+
 		// check if website has been set in the user profile
-		if (userWebsite.length != 0) {
+		if (userWebsite !== undefined && userWebsite.length != 0) {
+			
 			let websiteArray = userWebsite.split(".");
 			// check if the website is  compliant which means it should be
 			// composed at least by three parts like <part1>.<part2>.<part3> and <part1> == "www"
 			if (websiteArray.length >= 3 && websiteArray[0] == "www") {
+				
 				// use data from website
 				res.push("MAXON API suggested domain space");
 				res.push("The suggested MAXON API domain space, based on your profile, is: <b>" + websiteArray[2] + "." + websiteArray[1] + ".*</b>");
 			}
 			else {
+				
 				// use default value found in ACP
 				res.push("MAXON API suggested domain space");
 				res.push("The suggested MAXON API domain space, based on your profile, is: <b>" + settings.revdomainspace + "." +  userName + ".*</b>"); // To be changed
 			}
 		}
 		else {
+			
 			// use default value found in ACP
 			res.push("MAXON API suggested domain space");
 			res.push("The suggested MAXON API domain space, based on your profile, is: <b>" + settings.revdomainspace + "." +  userName + ".*</b>");
 		}
 	}
+	
+	// add the HTML for the form
+	res.push("<hr style='height:1px;border-width:0;background-color:gray'><h4>Plugin ID generation</h4><form>Label:&nbsp;<input type='text' name='pluginLabel' id='pluginLabel' maxlength='256'/><button type='button' onclick='GenerateID()'>Generate PluginID</button></form>");
 
 	return res;
 }
@@ -133,8 +146,8 @@ function PrepareHTMLfromPluginIDs(pluginIDArray, userName)
 {
 	let res = "";
 	let size_id = 10, size_label = 70, size_date = 20;
-	res = "<p>List of plugin ID assigned to <b>"+userName+"</b>:</p>";
-	res +="<table width=1024><tr><th width=\""+String(size_label)+"%\">Associated Label</th><th width=\""+String(size_id)+"%\">Plugin ID</th><th width=\""+String(size_date)+"%\">Creation Date</th></tr>";
+	res = "<br><h4>List of plugin ID assigned to <b>"+userName+"</b>:</h4>";
+	res +="<table><tr><th width=\""+String(size_label)+"%\">Associated Label</th><th width=\""+String(size_id)+"%\">Plugin ID</th><th width=\""+String(size_date)+"%\">Creation Date</th></tr>";
 	
 	// process the queryRes to return the data on the client
 	for (let i = 0; i < pluginIDArray.length; i++)
@@ -155,10 +168,10 @@ function ExecuteIncrementAndInsert(url, name, insvalue, callback){
 		let dbCollection = database.db(name).collection("objects");
 		dbCollection.update({_key : "globalPluginID"}, { $inc : { nextID : 1 }, $set : { lastCreated : insvalue.timestamp } }, function(err, result) {
 			if (err) throw err;
-			//console.log("nextID incremented");
+			
 			dbCollection.insertOne(insvalue, function(err, result) {
 				if (err) throw err;
-				//console.log("pluginID inserted");
+				
 				database.close(); 
 				callback(result);
 			});
@@ -167,18 +180,21 @@ function ExecuteIncrementAndInsert(url, name, insvalue, callback){
 }
 
 // onLoadPage function override for socket module
-socketModules.onLoadPage = function(socket, callback) {
-	if (socket.uid === 0){
-		callback (null, "<b>Wrong route!</b><br><p>Plugin ID generation is available to registered-only members.</p>");
-	}
-	else{
+socketModules.onLoadPage = function(socket, data, callback) {
+	let HTMLResObj = { domainInfo: [], pluginidInfo: ""};
 
+	if (socket.uid === 0){
+		HTMLResObj.domainInfo.push("Wrong route!");
+		HTMLResObj.domainInfo.push("Plugin ID generation is available to registered-only members.");
+		callback (null, HTMLResObj);
+	}
+	else{	
 		// try to retrieve c4dpluginid ACP settings
 		meta.settings.get('c4dpluginid', function(err, settings){
 			if (err) throw err;
 
 			// try to retrieve the information about the current logged user
-			ExecuteQuery(dbUrl, dbName, PrepareQueryUserData(socket.uid), "", 1, function(userData){
+			ExecuteQuery(constants.dburi, constants.dbname, PrepareQueryUserData(socket.uid), "", 1, function(userData){
 				
 				// retrieve the current user id
 				let userID = Number(userData[0].uid),
@@ -191,13 +207,12 @@ socketModules.onLoadPage = function(socket, callback) {
 				HTMLResObj.domainInfo = PrepareHTMLFromUserWebsite(settings, userWebsite, userName);
 
 				// try to execute the query to retrieve all the plugin registered by the current user
-				ExecuteQuery(dbUrl, dbName, PrepareQueryPluginIFromUser(userID), "timestamp", -1, function(pluginIDArray){	
+				ExecuteQuery(constants.dburi, constants.dbname, PrepareQueryPluginIFromUser(userID), "timestamp", -1, function(pluginIDArray){	
 					
 					if (pluginIDArray.length != 0)
 						// return the information about requested plugin IDs
 						HTMLResObj.pluginidInfo = PrepareHTMLfromPluginIDs(pluginIDArray, userName);
-
-					callback(null, HTMLResObj);
+						callback(null, HTMLResObj);
 				});
 			});
 		});
@@ -206,9 +221,12 @@ socketModules.onLoadPage = function(socket, callback) {
 
 // onGenerateID function override for socket module
 socketModules.onGenerateID = function(socket, data, callback){
+	let HTMLResObj = { domainInfo: [], pluginidInfo: ""};
 
 	if (socket.uid === 0){
-		callback (null, "<b>Wrong route!</b><br><p>Plugin ID generation is available to registered-only members.</p>");
+		HTMLResObj.domainInfo.push("Wrong route!");
+		HTMLResObj.domainInfo.push("Plugin ID generation is available to registered-only members.");
+		callback (null, HTMLResObj);
 	}
 	else{
 		
@@ -223,20 +241,18 @@ socketModules.onGenerateID = function(socket, data, callback){
 				if (err) throw err;
 
 				// try to retrieve the information about the current logged user
-				ExecuteQuery(dbUrl, dbName, PrepareQueryUserData(socket.uid), "", 1, function(userData){
+				ExecuteQuery(constants.dburi, constants.dbname, PrepareQueryUserData(socket.uid), "", 1, function(userData){
 
 					// retrieve the current user id
 					let userID = Number(userData[0].uid),
 						userName = userData[0].username,
 						userWebsite = userData[0].website;
-					
-					let HTMLResObj = { domainInfo: [], pluginidInfo: ""};
 
 					// return the information about MAXON API suggested domain space
 					HTMLResObj.domainInfo = PrepareHTMLFromUserWebsite(settings, userWebsite, userName);
 
 					// try to execute the query to check the next-to-be-used plugin ID
-					ExecuteQuery(dbUrl, dbName, dbQueryNextPluginID, "", 1, function(queryRes){	
+					ExecuteQuery(constants.dburi, constants.dbname, dbQueryNextPluginID, "", 1, function(queryRes){	
 						
 						// allocate the next-to-be-used plugin ID
 						let pluginidObj = {
@@ -248,10 +264,10 @@ socketModules.onGenerateID = function(socket, data, callback){
 							};
 						
 						// try to execute the insert of the new pluginid
-						ExecuteIncrementAndInsert(dbUrl, dbName, pluginidObj, function(insertRes){
+						ExecuteIncrementAndInsert(constants.dburi, constants.dbname, pluginidObj, function(insertRes){
 
 							// try to execute the query to retrieve all the plugin registered by the current user
-							ExecuteQuery(dbUrl, dbName, PrepareQueryPluginIFromUser(userID), "timestamp", -1, function(pluginIDArray){	
+							ExecuteQuery(constants.dburi, constants.dbname, PrepareQueryPluginIFromUser(userID), "timestamp", -1, function(pluginIDArray){	
 							
 								if (pluginIDArray.length != 0)
 									// return the information about requested plugin IDs

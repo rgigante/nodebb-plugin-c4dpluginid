@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-c4dpluginid",
-  "version": "0.1.4",
+  "version": "0.1.52",
   "description": "NodeBB plugin to request Cinema 4D Plugin IDs",
   "main": "library.js",
   "repository": {

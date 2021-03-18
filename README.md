@@ -8,18 +8,25 @@ The plugin needs the "Custom Pages" plugin to be installed and a custom page to 
 <!DOCTYPE html>
 <html>
 <head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
 <script>
-
 // executed upon the document is ready
 // retrieve the list of all the registration IDs belonging to the user and list them in the page
 $(document).ready(function() {
   socket.emit('modules.onLoadPage', function(err, result) {
-    if (result.domainInfo.length == 2 && result.domainInfo[0].length != 0)
+    if (result.domainInfo !== undefined)
     {
-      document.getElementById("suggestedDomainH4").innerHTML = result.domainInfo[0];
-      document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
+      if (result.domainInfo[0] !== undefined && result.domainInfo[0].length != 0)
+        document.getElementById("suggestedDomainH4").innerHTML = result.domainInfo[0];
+      
+      if (result.domainInfo[1] !== undefined && result.domainInfo[1].length != 0)
+        document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
+      
+      if (result.domainInfo[2] !== undefined && result.domainInfo[2].length != 0)
+      document.getElementById("form").innerHTML = result.domainInfo[2];
     }
-    document.getElementById("registeredID").innerHTML = result.pluginidInfo;
+    if (result.pluginidInfo !== undefined && result.pluginidInfo.length != 0 )
+      document.getElementById("registeredID").innerHTML = result.pluginidInfo;
   })
 });
 
@@ -30,12 +37,20 @@ function GenerateID(){
   let pluginLabel = document.getElementById("pluginLabel").value;
   document.getElementById("pluginLabel").value = '';
   socket.emit('modules.onGenerateID', {values: [pluginLabel]}, function(err, result) {
-    if (result.domainInfo.length == 2 && result.domainInfo[0].length != 0)
+    if (result.domainInfo !== undefined)
     {
-      document.getElementById("suggestedDomainH4").innerHTML = result.domainInfo[0];
-      document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
+      if (result.domainInfo[0] !== undefined && result.domainInfo[0].length != 0)
+        document.getElementById("suggestedDomainH4").innerHTML = result.domainInfo[0];
+      
+      if (result.domainInfo[1] !== undefined && result.domainInfo[1].length != 0)
+        document.getElementById("suggestedDomain").innerHTML = result.domainInfo[1];
+      
+      if (result.domainInfo[2] !== undefined && result.domainInfo[2].length != 0)
+      document.getElementById("form").innerHTML = result.domainInfo[2];
     }
-    document.getElementById("registeredID").innerHTML = result.pluginidInfo;
+    if (result.pluginidInfo !== undefined && result.pluginidInfo.length != 0 )
+      document.getElementById("registeredID").innerHTML = result.pluginidInfo;
+
     document.getElementById("pluginLabel").innerHTML = "done";
   });
 }
@@ -45,12 +60,8 @@ function GenerateID(){
 <body>
 <h4 id="suggestedDomainH4"></h4>
 <p id="suggestedDomain"></p>
-<h4>Plugin ID generation</h4>
-<form>
-  Label:&nbsp;<input type="text" name="pluginLabel" id="pluginLabel" maxlength="256"/>
-  <button type="button" onclick="GenerateID()">Get PluginID</button>
-</form>
-<hr><p id="registeredID"></p>
+<p id="form"></p>
+<p id="registeredID"></p>
 </body>
 </html>
 ```
