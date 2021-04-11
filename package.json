@@ -5,7 +5,7 @@
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rgigante/nodebb-plugin-c4dpluginid"
+    "url": "git+https://github.com/rgigante/nodebb-plugin-c4dpluginid.git"
   },
   "keywords": [
     "nodebb",
@@ -14,13 +14,19 @@
     "pluginid",
     "shell"
   ],
-  "author": {
-    "name": "rgigante",
-    "email": "r_gigante@maxon.net"
-  },
+  "author": "rgigante <r_gigante@maxon.net>",
   "license": "MIT",
-  "readmeFilename": "README.md",
   "nbbpm": {
     "compatibility": "^1.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/rgigante/nodebb-plugin-c4dpluginid/issues"
+  },
+  "homepage": "https://github.com/rgigante/nodebb-plugin-c4dpluginid#readme",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

@@ -79,7 +79,7 @@ function PrepareQueryUserData(userid){
 
 //  execute a generic query
 function ExecuteQuery (url, name, query, sortkey, sortval, callback){
-	MongoClient.connect(url, function(err, database){
+	MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, database){
 		if (err) throw err;
 		if (sortkey.length == 0)
 		{
@@ -163,10 +163,10 @@ function PrepareHTMLfromPluginIDs(pluginIDArray, userName)
 
 // execute the pluginID object insert and increment the global counter
 function ExecuteIncrementAndInsert(url, name, insvalue, callback){
-	MongoClient.connect(url, function(err, database){
+	MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, database){
 		if (err) throw err;
 		let dbCollection = database.db(name).collection("objects");
-		dbCollection.update({_key : "globalPluginID"}, { $inc : { nextID : 1 }, $set : { lastCreated : insvalue.timestamp } }, function(err, result) {
+		dbCollection.updateOne({_key : "globalPluginID"}, { $inc : { nextID : 1 }, $set : { lastCreated : insvalue.timestamp } }, function(err, result) {
 			if (err) throw err;
 			
 			dbCollection.insertOne(insvalue, function(err, result) {
