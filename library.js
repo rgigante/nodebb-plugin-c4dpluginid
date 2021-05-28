@@ -136,7 +136,7 @@ function PrepareHTMLFromUserWebsite(settings, userWebsite, userName) {
 	}
 	
 	// add the HTML for the form
-	res.push("<hr style='height:1px;border-width:0;background-color:gray'><h4>Plugin ID generation</h4><form>Label:&nbsp;<input type='text' name='pluginLabel' id='pluginLabel' maxlength='256'/><button type='button' onclick='GenerateID()'>Generate PluginID</button></form>");
+	res.push("<hr style='height:1px;border-width:0;background-color:gray'><h4>Plugin ID generation</h4><form>Label:&nbsp;<input type='text' name='pluginLabel' id='pluginLabel' size='70' maxlength='256' style='margin-right: 10px;'/><button type='button' onclick='GenerateID()'>Generate PluginID</button></form>");
 
 	return res;
 }
